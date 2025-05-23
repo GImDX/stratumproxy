@@ -123,18 +123,20 @@ func processAndForwardClientData(src, dst net.Conn) {
             fmt.Fprintf(dst, line+"\n") // 如果 method 字段不存在，直接转发
 			if debug {log.Printf("Client:%s -> Server Raw Data: %s", src.RemoteAddr().String(), string(line))}
             continue
+        }else {
+            if debug {log.Printf("Client:%s -> Server Raw Data: %s", src.RemoteAddr().String(), string(line))}
         }
 
         // 处理 mining.authorize 和 mining.submit
-        if method == "mining.authorize" || method == "mining.submit" {
+        if method == "mining.authorize" || method == "mining.submit" || method == "mining.subscribe"{
             params, ok := msg["params"].([]interface{})
 			original := params[0] // 记录修改前的 params[0]
             if ok && len(params) >= 1 {
                 modifyParams(params) // 调用修改方法
                 msg["params"] = params
             }
-			if method == "mining.authorize" {
-				log.Printf("Modifying mining.authorize: %v -> %s", original, params[0])
+			if method != "mining.submit"{
+				log.Printf("Modifying %v: %v -> %s",method , original, params[0])
 			}
         }
 
